@@ -220,6 +220,7 @@
 				TargetAttributes = {
 					3DB6254F1E4154D8003CB1AC = {
 						CreatedOnToolsVersion = 8.1;
+						DevelopmentTeam = UT6TK6B6QY;
 						ProvisioningStyle = Automatic;
 					};
 					3DB625631E4154D8003CB1AC = {
@@ -294,7 +295,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run \'pod install\' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n";
+			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n";
 			showEnvVarsInLog = 0;
 		};
 		DDE329AA315A8BF24C14E34B /* [CP] Copy Pods Resources */ = {
@@ -488,6 +489,7 @@
 			baseConfigurationReference = 5EDCA2A01805F9AB53F14E6E /* Pods-Music2.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = UT6TK6B6QY;
 				INFOPLIST_FILE = Music2/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = Zeyad.Music2;
@@ -501,6 +503,7 @@
 			baseConfigurationReference = 9E2A815B867216E0A3F1CCD7 /* Pods-Music2.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = UT6TK6B6QY;
 				INFOPLIST_FILE = Music2/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = Zeyad.Music2;
@@ -582,6 +585,7 @@
 				3DB6257A1E4154D8003CB1AC /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		3DB6257B1E4154D8003CB1AC /* Build configuration list for PBXNativeTarget "Music2Tests" */ = {
 			isa = XCConfigurationList;
@@ -590,6 +594,7 @@
 				3DB6257D1E4154D8003CB1AC /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		3DB6257E1E4154D8003CB1AC /* Build configuration list for PBXNativeTarget "Music2UITests" */ = {
 			isa = XCConfigurationList;
@@ -598,6 +603,7 @@
 				3DB625801E4154D8003CB1AC /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
