@@ -70,19 +70,24 @@ class ViewController: UIViewController {
         reverb.loadFactoryPreset(.mediumRoom)
         
         // Start Timers
-        timer = Timer.scheduledTimer(timeInterval: 0.5, target: self, selector: Selector("playChord"), userInfo: nil, repeats: true)
         
-        timer2 = Timer.scheduledTimer(timeInterval: 0.5/4, target: self, selector: Selector("playMelody"), userInfo: nil, repeats: true)
+        timer = Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(ViewController.playChord as (ViewController) -> () -> ()), userInfo: nil, repeats: true)
+        
+        timer2 = Timer.scheduledTimer(timeInterval: 1.0/4, target: self, selector: #selector(ViewController.playMelody), userInfo: nil, repeats: true)
         
     }
     
     func playChord(){
-        playChord(note: ViewController.Notes(rawValue: currentChord)!, scale: .Major)
-        currentChord = Int((currentChord + 7).truncatingRemainder(dividingBy: 12))
+        if(biomusicOption.isOn){
+            playChord(note: ViewController.Notes(rawValue: currentChord)!, scale: .Major)
+            currentChord = Int((currentChord + 7).truncatingRemainder(dividingBy: 12))
+        }
     }
 
     func playMelody(){
-        playMelodyNote(note: currentChord, generator: 1, octave: 4)
+        if(biomusicOption.isOn){
+            playMelodyNote(note: currentChord, generator: 1, octave: 4)
+        }
     }
     
     // Takes a note as an argument
@@ -134,107 +139,108 @@ class ViewController: UIViewController {
         snare.stop(noteNumber: 60)
         print("snare")
     }
-    @IBOutlet weak var isNote: UISwitch!
+    
+    @IBOutlet weak var isChord: UISwitch!
+    @IBOutlet weak var biomusicOption: UISwitch!
    
     
     
     
-    
     @IBAction func ANote(_ sender: UIButton) {
-        if (isNote.isOn){
-            playChordNote(note: .A, generator: 1, octave: 4)
+        if (isChord.isOn){
+            playChord(note: .A, scale: .Major)
         }
         else{
-            playChord(note: .A, scale: .Major)
+            playMelodyNote(note: .A, generator: 2, octave: 4)
         }
     }
     @IBAction func ASharpNote(_ sender: UIButton) {
-        if (isNote.isOn){
-            playChordNote(note: .A_Sharp, generator: 1, octave: 4)
+        if (isChord.isOn){
+            playChord(note: .A_Sharp, scale: .Major)
         }
         else{
-            playChord(note: .A_Sharp, scale: .Major)
+            playMelodyNote(note: .A_Sharp, generator: 2, octave: 4)
         }
     }
     @IBAction func BNote(_ sender: UIButton) {
-        if (isNote.isOn){
-            playChordNote(note: .B, generator: 1, octave: 4)
+        if (isChord.isOn){
+            playChord(note: .B, scale: .Major)
         }
         else{
-            playChord(note: .B, scale: .Major)
+            playMelodyNote(note: .B, generator: 2, octave: 4)
         }
     }
     @IBAction func CNote(_ sender: UIButton) {
-        if (isNote.isOn){
-            playChordNote(note: .C, generator: 1, octave: 4)
+        if (isChord.isOn){
+            playChord(note: .C, scale: .Major)
         }
         else{
-            playChord(note: .C, scale: .Major)
+            playMelodyNote(note: .C, generator: 2, octave: 4)
         }
     }
     @IBAction func CSharpNote(_ sender: UIButton) {
-        if (isNote.isOn){
-            playChordNote(note: .C_Sharp, generator: 1, octave: 4)
+        if (isChord.isOn){
+            playChord(note: .C_Sharp, scale: .Major)
         }
         else{
-            playChord(note: .C_Sharp, scale: .Major)
+            playMelodyNote(note: .C_Sharp, generator: 2, octave: 4)
         }
     }
     @IBAction func DNote(_ sender: UIButton) {
-        if (isNote.isOn){
-            playChordNote(note: .D, generator: 1, octave: 4)
+        if (isChord.isOn){
+            playChord(note: .D, scale: .Major)
         }
         else{
-            playChord(note: .D, scale: .Major)
+            playMelodyNote(note: .D, generator: 2, octave: 4)
         }
     }
     @IBAction func DSharpNote(_ sender: UIButton) {
-        if (isNote.isOn){
-            playChordNote(note: .D_Sharp, generator: 1, octave: 4)
+        if (isChord.isOn){
+            playChord(note: .D_Sharp, scale: .Major)
         }
         else{
-            playChord(note: .D_Sharp, scale: .Major)
+            playMelodyNote(note: .D_Sharp, generator: 2, octave: 4)
         }
     }
     @IBAction func ENote(_ sender: UIButton) {
-        if (isNote.isOn){
-            playChordNote(note: .E, generator: 1, octave: 4)
+        if (isChord.isOn){
+            playChord(note: .E, scale: .Major)
         }
         else{
-            playChord(note: .E, scale: .Major)
+            playMelodyNote(note: .E, generator: 2, octave: 4)
         }
     }
     
     @IBAction func FNote(_ sender: UIButton) {
-        if (isNote.isOn) {
-            playChordNote(note: .F, generator: 1, octave: 4)
+        if (isChord.isOn) {
+            playChord(note: .F, scale: .Major)
         }
         else {
-            playChord(note: .F, scale: .Major)
+            playMelodyNote(note: .F, generator: 2, octave: 4)
         }
     }
     @IBAction func FSharpNote(_ sender: UIButton) {
-        if (isNote.isOn){
-            playChordNote(note: .F_Sharp, generator: 1, octave: 4)
+        if (isChord.isOn){
+            playChord(note: .F_Sharp, scale: .Major)
         }
         else{
-            playChord(note: .F_Sharp, scale: .Major)
+            playMelodyNote(note: .F_Sharp, generator: 2, octave: 4)
         }
     }
     @IBAction func GNote(_ sender: UIButton) {
-        if (isNote.isOn){
-            playChordNote(note: .G, generator: 1, octave: 4)
+        if (isChord.isOn){
+            playChord(note: .G, scale: .Major)
         }
         else{
-            playChord(note: .G, scale: .Major)
+            playMelodyNote(note: .G, generator: 2, octave: 4)
         }
     }
     @IBAction func GSharpNote(_ sender: UIButton) {
-        if (isNote.isOn){
-            playChordNote(note: .G_Sharp, generator: 1, octave: 4)
+        if (isChord.isOn){
+            playChord(note: .G_Sharp, scale: .Major)
         }
         else{
-            playChord(note: .G_Sharp, scale: .Major)
+            playMelodyNote(note: .G_Sharp, generator: 2, octave: 4)
         }
     }
     
@@ -244,16 +250,16 @@ class ViewController: UIViewController {
     @IBAction func randomMandolinBtn(_ sender: UIButton) {
         playRandomMandolin()
     }
-   
+    
     @IBAction func frequencySlider(_ sender: UISlider) {
         timer.invalidate()
         timer2.invalidate()
         
         timerFrequency = (Double(sender.value))
         print(sender.value)
-        timer = Timer.scheduledTimer(timeInterval: timerFrequency, target: self, selector: Selector("playChord"), userInfo: nil, repeats: true)
+        timer = Timer.scheduledTimer(timeInterval: timerFrequency, target: self, selector: #selector(ViewController.playChord as (ViewController) -> () -> ()), userInfo: nil, repeats: true)
         
-        timer2 = Timer.scheduledTimer(timeInterval: timerFrequency/4, target: self, selector: Selector("playMelody"), userInfo: nil, repeats: true)
+        timer2 = Timer.scheduledTimer(timeInterval: timerFrequency/4, target: self, selector: #selector(ViewController.playMelody), userInfo: nil, repeats: true)
     }
     
     func playRandomFluteNote(){
