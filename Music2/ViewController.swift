@@ -11,18 +11,20 @@ import AudioKit
 
 class ViewController: UIViewController {
     
-    
     // Global Vars
-    var kick        = AKSynthKick()
-    var snare       = AKSynthSnare(duration: 0.07)
-    var flute       = AKFlute()
-    var mandolin    = AKMandolin()
-    var oscillator  = AKOscillator()
+    var kick            = AKSynthKick()
+    var snare           = AKSynthSnare(duration: 0.07)
+    var flute           = AKFlute()
+    var mandolin        = AKMandolin()
+    var mandolin2       = AKMandolin()
+    var pluckedString   = AKPluckedString()
+    var oscillator      = AKOscillator()
     var currentChord : Int = 0
     
     let scale           = [0, 2, 4, 5, 7, 9, 11, 12]
     var pluckPosition   = 0.2
     
+    // Enums
     enum Notes: Int {
         case C = 0, C_Sharp, D, D_Sharp, E, F, F_Sharp, G, G_Sharp, A, A_Sharp, B
     }
@@ -34,54 +36,86 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        kick = AKSynthKick()
+        // Initialization
+        kick            = AKSynthKick()
+        snare           = AKSynthSnare(duration: 0.07)
+        flute           = AKFlute()
+        mandolin        = AKMandolin()
+        mandolin2       = AKMandolin()
+        pluckedString   = AKPluckedString()
         
-        snare = AKSynthSnare(duration: 0.07)
-        
-        flute = AKFlute()
-        
-        mandolin = AKMandolin()
+        // Config
         mandolin.detune = 1
-        mandolin.bodySize = 1
-        mandolin.presetElectricGuitarMandolin()
+        mandolin.bodySize = 10
+        mandolin.presetLargeResonantMandolin()
+        let mandolinReverb = AKReverb(mandolin)
         
-        let mix = AKMixer(kick, snare, flute, mandolin)
+        mandolin2.detune = 1
+        mandolin2.bodySize = 1
+        mandolin2.presetElectricGuitarMandolin()
+        
+        // Prepare Output
+        let mix = AKMixer(kick, snare, flute, mandolinReverb, mandolin2)
         let reverb = AKReverb(mix)
         
         AudioKit.output = reverb
         AudioKit.start()
         
-        reverb.loadFactoryPreset(.largeRoom)
+        // Effects
+        reverb.loadFactoryPreset(.mediumRoom)
         
-        var timer = Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: Selector("sayHello"), userInfo: nil, repeats: true)
+        // "Loop"
+        var timerFrequency = 1.0
+        var timer = Timer.scheduledTimer(timeInterval: timerFrequency, target: self, selector: Selector("playChord"), userInfo: nil, repeats: true)
         
+        var timer2 = Timer.scheduledTimer(timeInterval: timerFrequency/4, target: self, selector: Selector("playMelody"), userInfo: nil, repeats: true)
     }
     
-    func sayHello(){
+    func playChord(){
         playChord(note: ViewController.Notes(rawValue: currentChord)!, scale: .Major)
         currentChord = Int((currentChord + 7).truncatingRemainder(dividingBy: 12))
     }
+
+    func playMelody(){
+        playMelodyNote(note: currentChord, generator: 1, octave: 4)
+    }
     
-    func playNote(note: Notes, generator: Int, octave: Int){
+    // Takes a note as an argument
+    func playChordNote(note: Notes, generator: Int, octave: Int){
         mandolin.fret(noteNumber: note.rawValue + 12*octave, course: generator)
         mandolin.pluck(course: generator, position: pluckPosition, velocity: 127)
     }
     
-    func playNote(note: Int, generator: Int, octave: Int){
+    // Takes an Int representing a note as an argument
+    func playChordNote(note: Int, generator: Int, octave: Int){
         mandolin.fret(noteNumber: note + 12*octave, course: generator)
         mandolin.pluck(course: generator, position: pluckPosition, velocity: 127)
     }
     
+    // Takes a note as an argument
+    func playMelodyNote(note: Notes, generator: Int, octave: Int){
+        mandolin2.fret(noteNumber: note.rawValue + 12*octave, course: generator)
+        mandolin2.pluck(course: generator, position: pluckPosition, velocity: 127)
+    }
+    
+    // Takes an Int representing a note as an argument
+    func playMelodyNote(note: Int, generator: Int, octave: Int){
+        mandolin2.fret(noteNumber: note + 12*octave, course: generator)
+        mandolin2.pluck(course: generator, position: pluckPosition, velocity: 127)
+    }
+
+    
+    
     func playChord(note: Notes, scale: Scales){
         switch scale {
         case .Major:    //1 - 4 - 7
-            playNote(note: note.rawValue, generator: 1, octave: 4)
-            playNote(note: (Int)((note.rawValue + 4).truncatingRemainder(dividingBy: 12)), generator: 2, octave: 4)  //Mod
-            playNote(note: (Int)((note.rawValue + 7).truncatingRemainder(dividingBy:12)), generator: 3, octave: 4)
+            playChordNote(note: note.rawValue, generator: 1, octave: 4)
+            playChordNote(note: (Int)((note.rawValue + 4).truncatingRemainder(dividingBy: 12)), generator: 2, octave: 4)  //Mod
+            playChordNote(note: (Int)((note.rawValue + 7).truncatingRemainder(dividingBy:12)), generator: 3, octave: 4)
         case .Minor:    //1 - 3 - 7
-            playNote(note: note.rawValue, generator: 1, octave: 4)
-            playNote(note: (Int)((note.rawValue + 3).truncatingRemainder(dividingBy: 12)), generator: 2, octave: 4)
-            playNote(note: (Int)((note.rawValue + 7).truncatingRemainder(dividingBy:12)), generator: 3, octave: 4)
+            playChordNote(note: note.rawValue, generator: 1, octave: 4)
+            playChordNote(note: (Int)((note.rawValue + 3).truncatingRemainder(dividingBy: 12)), generator: 2, octave: 4)
+            playChordNote(note: (Int)((note.rawValue + 7).truncatingRemainder(dividingBy:12)), generator: 3, octave: 4)
         }
     }
 
@@ -97,9 +131,13 @@ class ViewController: UIViewController {
     }
     @IBOutlet weak var isNote: UISwitch!
    
+    
+    
+    
+    
     @IBAction func ANote(_ sender: UIButton) {
         if (isNote.isOn){
-            playNote(note: .A, generator: 1, octave: 4)
+            playChordNote(note: .A, generator: 1, octave: 4)
         }
         else{
             playChord(note: .A, scale: .Major)
@@ -107,7 +145,7 @@ class ViewController: UIViewController {
     }
     @IBAction func ASharpNote(_ sender: UIButton) {
         if (isNote.isOn){
-            playNote(note: .A_Sharp, generator: 1, octave: 4)
+            playChordNote(note: .A_Sharp, generator: 1, octave: 4)
         }
         else{
             playChord(note: .A_Sharp, scale: .Major)
@@ -115,7 +153,7 @@ class ViewController: UIViewController {
     }
     @IBAction func BNote(_ sender: UIButton) {
         if (isNote.isOn){
-            playNote(note: .B, generator: 1, octave: 4)
+            playChordNote(note: .B, generator: 1, octave: 4)
         }
         else{
             playChord(note: .B, scale: .Major)
@@ -123,7 +161,7 @@ class ViewController: UIViewController {
     }
     @IBAction func CNote(_ sender: UIButton) {
         if (isNote.isOn){
-            playNote(note: .C, generator: 1, octave: 4)
+            playChordNote(note: .C, generator: 1, octave: 4)
         }
         else{
             playChord(note: .C, scale: .Major)
@@ -131,7 +169,7 @@ class ViewController: UIViewController {
     }
     @IBAction func CSharpNote(_ sender: UIButton) {
         if (isNote.isOn){
-            playNote(note: .C_Sharp, generator: 1, octave: 4)
+            playChordNote(note: .C_Sharp, generator: 1, octave: 4)
         }
         else{
             playChord(note: .C_Sharp, scale: .Major)
@@ -139,7 +177,7 @@ class ViewController: UIViewController {
     }
     @IBAction func DNote(_ sender: UIButton) {
         if (isNote.isOn){
-            playNote(note: .D, generator: 1, octave: 4)
+            playChordNote(note: .D, generator: 1, octave: 4)
         }
         else{
             playChord(note: .D, scale: .Major)
@@ -147,7 +185,7 @@ class ViewController: UIViewController {
     }
     @IBAction func DSharpNote(_ sender: UIButton) {
         if (isNote.isOn){
-            playNote(note: .D_Sharp, generator: 1, octave: 4)
+            playChordNote(note: .D_Sharp, generator: 1, octave: 4)
         }
         else{
             playChord(note: .D_Sharp, scale: .Major)
@@ -155,7 +193,7 @@ class ViewController: UIViewController {
     }
     @IBAction func ENote(_ sender: UIButton) {
         if (isNote.isOn){
-            playNote(note: .E, generator: 1, octave: 4)
+            playChordNote(note: .E, generator: 1, octave: 4)
         }
         else{
             playChord(note: .E, scale: .Major)
@@ -164,7 +202,7 @@ class ViewController: UIViewController {
     
     @IBAction func FNote(_ sender: UIButton) {
         if (isNote.isOn) {
-            playNote(note: .F, generator: 1, octave: 4)
+            playChordNote(note: .F, generator: 1, octave: 4)
         }
         else {
             playChord(note: .F, scale: .Major)
@@ -172,7 +210,7 @@ class ViewController: UIViewController {
     }
     @IBAction func FSharpNote(_ sender: UIButton) {
         if (isNote.isOn){
-            playNote(note: .F_Sharp, generator: 1, octave: 4)
+            playChordNote(note: .F_Sharp, generator: 1, octave: 4)
         }
         else{
             playChord(note: .F_Sharp, scale: .Major)
@@ -180,7 +218,7 @@ class ViewController: UIViewController {
     }
     @IBAction func GNote(_ sender: UIButton) {
         if (isNote.isOn){
-            playNote(note: .G, generator: 1, octave: 4)
+            playChordNote(note: .G, generator: 1, octave: 4)
         }
         else{
             playChord(note: .G, scale: .Major)
@@ -188,7 +226,7 @@ class ViewController: UIViewController {
     }
     @IBAction func GSharpNote(_ sender: UIButton) {
         if (isNote.isOn){
-            playNote(note: .G_Sharp, generator: 1, octave: 4)
+            playChordNote(note: .G_Sharp, generator: 1, octave: 4)
         }
         else{
             playChord(note: .G_Sharp, scale: .Major)
