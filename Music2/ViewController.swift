@@ -18,6 +18,7 @@ class ViewController: UIViewController {
     var flute       = AKFlute()
     var mandolin    = AKMandolin()
     var oscillator  = AKOscillator()
+    var currentChord : Int = 0
     
     let scale           = [0, 2, 4, 5, 7, 9, 11, 12]
     var pluckPosition   = 0.2
@@ -51,6 +52,14 @@ class ViewController: UIViewController {
         AudioKit.start()
         
         reverb.loadFactoryPreset(.largeRoom)
+        
+        var timer = Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: Selector("sayHello"), userInfo: nil, repeats: true)
+        
+    }
+    
+    func sayHello(){
+        playChord(note: ViewController.Notes(rawValue: currentChord)!, scale: .Major)
+        currentChord = Int((currentChord + 7).truncatingRemainder(dividingBy: 12))
     }
     
     func playNote(note: Notes, generator: Int, octave: Int){
@@ -67,12 +76,13 @@ class ViewController: UIViewController {
         switch scale {
         case .Major:    //1 - 4 - 7
             playNote(note: note.rawValue, generator: 1, octave: 4)
-            playNote(note: (Int)((note.rawValue + 4).truncatingRemainder(dividingBy: 12)), generator: 2, octave: 4)
+            playNote(note: (Int)((note.rawValue + 4).truncatingRemainder(dividingBy: 12)), generator: 2, octave: 4)  //Mod
             playNote(note: (Int)((note.rawValue + 7).truncatingRemainder(dividingBy:12)), generator: 3, octave: 4)
-        case .Minor:    //1 - 3 -7
+        case .Minor:    //1 - 3 - 7
             playNote(note: note.rawValue, generator: 1, octave: 4)
             playNote(note: (Int)((note.rawValue + 3).truncatingRemainder(dividingBy: 12)), generator: 2, octave: 4)
-            playNote(note: (Int)((note.rawValue + 7).truncatingRemainder(dividingBy:12)), generator: 3, octave: 4)        }
+            playNote(note: (Int)((note.rawValue + 7).truncatingRemainder(dividingBy:12)), generator: 3, octave: 4)
+        }
     }
 
     @IBAction func kickBtn(_ sender: UIButton) {
@@ -231,10 +241,6 @@ class ViewController: UIViewController {
             mandolin.pluck(course: course2 - 1, position: pluckPosition, velocity: 127)
         }
     }
-    
-
-    
-    
     
     func createAndStartOscillator(frequency: Double) -> AKOscillator {
         let oscillator = AKOscillator()
