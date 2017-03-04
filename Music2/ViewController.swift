@@ -19,10 +19,15 @@ class ViewController: UIViewController {
     var mandolin2       = AKMandolin()
     var pluckedString   = AKPluckedString()
     var oscillator      = AKOscillator()
-    var currentChord : Int = 0
+    var timer = Timer()
+    var timer2 = Timer()
+    
+    
+    var currentChord:Int = 0
+    var timerFrequency:Double = 1.0
     
     let scale           = [0, 2, 4, 5, 7, 9, 11, 12]
-    var pluckPosition   = 0.2
+    var pluckPosition   = 0.5
     
     // Enums
     enum Notes: Int {
@@ -64,11 +69,11 @@ class ViewController: UIViewController {
         // Effects
         reverb.loadFactoryPreset(.mediumRoom)
         
-        // "Loop"
-        var timerFrequency = 1.0
-        var timer = Timer.scheduledTimer(timeInterval: timerFrequency, target: self, selector: Selector("playChord"), userInfo: nil, repeats: true)
+        // Start Timers
+        timer = Timer.scheduledTimer(timeInterval: 0.5, target: self, selector: Selector("playChord"), userInfo: nil, repeats: true)
         
-        var timer2 = Timer.scheduledTimer(timeInterval: timerFrequency/4, target: self, selector: Selector("playMelody"), userInfo: nil, repeats: true)
+        timer2 = Timer.scheduledTimer(timeInterval: 0.5/4, target: self, selector: Selector("playMelody"), userInfo: nil, repeats: true)
+        
     }
     
     func playChord(){
@@ -241,7 +246,14 @@ class ViewController: UIViewController {
     }
    
     @IBAction func frequencySlider(_ sender: UISlider) {
-        oscillator.frequency = Double (sender.value * 261.63)
+        timer.invalidate()
+        timer2.invalidate()
+        
+        timerFrequency = (Double(sender.value))
+        print(sender.value)
+        timer = Timer.scheduledTimer(timeInterval: timerFrequency, target: self, selector: Selector("playChord"), userInfo: nil, repeats: true)
+        
+        timer2 = Timer.scheduledTimer(timeInterval: timerFrequency/4, target: self, selector: Selector("playMelody"), userInfo: nil, repeats: true)
     }
     
     func playRandomFluteNote(){
