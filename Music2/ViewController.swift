@@ -28,7 +28,106 @@ class ViewController: UIViewController {
         snare.stop(noteNumber: 60)
         print("snare")
     }
+    @IBOutlet weak var isNote: UISwitch!
    
+    @IBAction func ANote(_ sender: UIButton) {
+        if (isNote.isOn){
+            playANote()
+        }
+        else{
+            playAChord()
+        }
+    }
+    @IBAction func ASharpNote(_ sender: UIButton) {
+        if (isNote.isOn){
+            playASharpNote()
+        }
+        else{
+            playASharpChord()
+        }
+    }
+    @IBAction func BNote(_ sender: UIButton) {
+        if (isNote.isOn){
+            playBNote()
+        }
+        else{
+            playBChord()
+        }
+    }
+    @IBAction func CNote(_ sender: UIButton) {
+        if (isNote.isOn){
+            playCNote()
+        }
+        else{
+            playCChord()
+        }
+    }
+    @IBAction func CSharpNote(_ sender: UIButton) {
+        if (isNote.isOn){
+            playCSharpNote()
+        }
+        else{
+            playCSharpChord()
+        }
+    }
+    @IBAction func DNote(_ sender: UIButton) {
+        if (isNote.isOn){
+            playDNote()
+        }
+        else{
+            playDChord()
+        }
+    }
+    @IBAction func DSharpNote(_ sender: UIButton) {
+        if (isNote.isOn){
+            playDSharpNote()
+        }
+        else{
+            playDSharpChord()
+        }
+    }
+    @IBAction func ENote(_ sender: UIButton) {
+        if (isNote.isOn){
+            playENote()
+        }
+        else{
+            playEChord()
+        }
+    }
+    
+    @IBAction func FNote(_ sender: UIButton) {
+        if (isNote.isOn){
+            playFNote()
+        }
+        else{
+            playFChord()
+        }
+    }
+    @IBAction func FSharpNote(_ sender: UIButton) {
+        if (isNote.isOn){
+            playFSharpNote()
+        }
+        else{
+            playFSharpChord()
+        }
+    }
+    @IBAction func GNote(_ sender: UIButton) {
+        if (isNote.isOn){
+            playGNote()
+        }
+        else{
+            playGChord()
+        }
+    }
+    @IBAction func GSharpNote(_ sender: UIButton) {
+        if (isNote.isOn){
+            playGSharpNote()
+        }
+        else{
+            playGSharpChord()
+        }
+    }
+    
     @IBAction func randomFlute(_ sender: UIButton) {
         playRandomFluteNote()
     }
@@ -94,19 +193,123 @@ class ViewController: UIViewController {
         }
     }
     
+    func playANote(){
+        mandolin.fret(noteNumber: 57, course: 1)
+        mandolin.pluck(course: 1, position: pluckPosition, velocity: 127)
+    }
+    func playASharpNote(){
+        mandolin.fret(noteNumber: 58, course: 1)
+        mandolin.pluck(course: 1, position: pluckPosition, velocity: 127)
+    }
+    func playBNote(){
+        mandolin.fret(noteNumber: 59, course: 1)
+        mandolin.pluck(course: 1, position: pluckPosition, velocity: 127)
+    }
+    func playCNote(){
+        mandolin.fret(noteNumber: 48, course: 1)
+        mandolin.pluck(course: 1, position: pluckPosition, velocity: 127)
+    }
+    func playCSharpNote(){
+        mandolin.fret(noteNumber: 49, course: 1)
+        mandolin.pluck(course: 1, position: pluckPosition, velocity: 127)
+    }
+    func playDNote(){
+        mandolin.fret(noteNumber: 50, course: 1)
+        mandolin.pluck(course: 1, position: pluckPosition, velocity: 127)
+    }
+    func playDSharpNote(){
+        mandolin.fret(noteNumber: 51, course: 1)
+        mandolin.pluck(course: 1, position: pluckPosition, velocity: 127)
+    }
+    func playENote(){
+        mandolin.fret(noteNumber: 52, course: 1)
+        mandolin.pluck(course: 1, position: pluckPosition, velocity: 127)
+    }
+    func playFNote(){
+        mandolin.fret(noteNumber: 53, course: 1)
+        mandolin.pluck(course: 1, position: pluckPosition, velocity: 127)
+    }
+    func playFSharpNote(){
+        mandolin.fret(noteNumber: 54, course: 1)
+        mandolin.pluck(course: 1, position: pluckPosition, velocity: 127)
+    }
+    func playGNote(){
+        mandolin.fret(noteNumber: 55, course: 1)
+        mandolin.pluck(course: 1, position: pluckPosition, velocity: 127)
+    }
+    func playGSharpNote(){
+        mandolin.fret(noteNumber: 56, course: 1)
+        mandolin.pluck(course: 1, position: pluckPosition, velocity: 127)
+    }
+    
+    
+    
+    func playAChord(){
+        playANote()
+        playCSharpNote()
+        playENote()
+    }
+    func playASharpChord(){
+        playASharpNote()
+        playDNote()
+        playFNote()
+    }
+    func playBChord(){
+        playBNote()
+        playDSharpNote()
+        playFSharpNote()
+    }
+    func playCChord(){
+        playCNote()
+        playENote()
+        playGNote()
+    }
+    func playCSharpChord(){
+        playCSharpNote()
+        playFChord()
+        playGSharpNote()
+    }
+    func playDChord(){
+        playDNote()
+        playFSharpNote()
+        playANote()
+    }
+    func playDSharpChord(){
+        playDSharpNote()
+        playENote()
+        playASharpNote()
+    }
+    func playEChord(){
+        playENote()
+        playGSharpNote()
+        playBNote()
+    }
+    func playFChord(){
+        playFNote()
+        playANote()
+        playCNote()
+    }
+    func playFSharpChord(){
+        playFSharpNote()
+        playASharpNote()
+        playCSharpNote()
+    }
+    func playGChord(){
+        playGNote()
+        playBNote()
+        playDNote()
+    }
+    func playGSharpChord(){
+        playGSharpNote()
+        playCNote()
+        playDSharpNote()
+    }
     
     
     
     
-//    func playCChord(){
-//        bank.play(noteNumber: 72, velocity: 80)
-//        bank.play(noteNumber: 76, velocity: 80)
-//        bank.play(noteNumber: 79, velocity: 80)
-//        sleep(2)
-//        bank.stop(noteNumber: 72)
-//        bank.stop(noteNumber: 76)
-//        bank.stop(noteNumber: 79)
-//    }
+    
+    
     
     func createAndStartOscillator(frequency: Double) -> AKOscillator {
         let oscillator = AKOscillator()
