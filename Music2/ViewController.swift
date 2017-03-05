@@ -20,8 +20,8 @@ class ViewController: UIViewController {
     var timer = Timer()
     var timer2 = Timer()
     
-    var tempDelta   : Double = 0.3
-    var tempEDA     : Double = 0.3
+    var deltaTemp   : Double = 0.3
+    var deltaEDA     : Double = 0.3
     var baselineTemp: Double = 0
     var baselineEDA : Double = 0
     var currentTemp : Double = 36
@@ -29,6 +29,8 @@ class ViewController: UIViewController {
     var currentChord: Int    = 0
     var timerFrequency:Double = 1.0
     var pluckPosition   = 0.5
+    var majorScale = [0,4,7]
+    var scaleIndex = 0
     
     
     // Enums
@@ -97,28 +99,23 @@ class ViewController: UIViewController {
         reverb.loadFactoryPreset(.mediumRoom)
         
         // Start Timers
-        
         timer = Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(ViewController.playChord as (ViewController) -> () -> ()), userInfo: nil, repeats: true)
-        
         timer2 = Timer.scheduledTimer(timeInterval: 1.0/4, target: self, selector: #selector(ViewController.playMelody), userInfo: nil, repeats: true)
-        
     }
     
     func playChord(){
-        if (abs(currentTemp - baselineTemp) > tempDelta){
-            print("Stepping")
+        if (abs(currentTemp - baselineTemp) > deltaTemp){
             if (currentTemp > baselineTemp){    //Step up to the next chord in the cycle of fifth
                 currentChord = Int((currentChord + 7).truncatingRemainder(dividingBy: 12))
             }
             else {      //Step down to the precious chord in the cycle of fifth
                 currentChord = Int((currentChord - 7).truncatingRemainder(dividingBy: 12))
             }
-            print("Current chord before correction", currentChord)
             if (currentChord < 0){
                 currentChord = 12 + currentChord
             }
-            print("current chord after correction", currentChord)
             baselineTemp = currentTemp
+            scaleIndex = 0
         }
         
         if(biomusicOption.isOn){
@@ -127,8 +124,22 @@ class ViewController: UIViewController {
     }
 
     func playMelody(){
+        if (abs(currentEDA - baselineEDA) > deltaEDA){
+            if (currentEDA > baselineEDA){    //Step up to the next chord in the cycle of fifth
+                scaleIndex = Int((scaleIndex + 1).truncatingRemainder(dividingBy: 3))
+            }
+            else {      //Step down to the precious chord in the cycle of fifth
+                scaleIndex = Int((scaleIndex - 1).truncatingRemainder(dividingBy: 3))
+            }
+            if (scaleIndex < 0){
+                scaleIndex = 3 + scaleIndex
+            }
+            baselineEDA = currentEDA
+        }
+        
+        
         if(biomusicOption.isOn){
-            playMelodyNote(note: currentChord, generator: 1, octave: 4)
+            playMelodyNote(note: currentChord + majorScale[scaleIndex], generator: 1, octave: 4)
         }
     }
     
