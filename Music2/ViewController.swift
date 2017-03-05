@@ -17,17 +17,19 @@ class ViewController: UIViewController {
     var flute           = AKFlute()
     var mandolin        = AKMandolin()
     var mandolin2       = AKMandolin()
-    var pluckedString   = AKPluckedString()
-    var oscillator      = AKOscillator()
     var timer = Timer()
     var timer2 = Timer()
     
-    
-    var currentChord:Int = 0
+    var tempDelta   : Double = 0.3
+    var tempEDA     : Double = 0.3
+    var baselineTemp: Double = 0
+    var baselineEDA : Double = 0
+    var currentTemp : Double = 36
+    var currentEDA  : Double = 0.2
+    var currentChord: Int    = 0
     var timerFrequency:Double = 1.0
-    
-    let scale           = [0, 2, 4, 5, 7, 9, 11, 12]
     var pluckPosition   = 0.5
+    
     
     // Enums
     enum Notes: Int {
@@ -38,16 +40,41 @@ class ViewController: UIViewController {
         case Major, Minor
     }
     
+    //Outlets
+    @IBOutlet weak var isChord: UISwitch!
+    @IBOutlet weak var biomusicOption: UISwitch!
+    @IBAction func tempPlus(_ sender: UIButton) {
+        currentTemp+=0.1
+    }
+    @IBAction func tempMinus(_ sender: UIButton) {
+        currentTemp-=0.1
+    }
+    @IBAction func edaPlus(_ sender: UIButton) {
+        currentEDA+=0.1
+    }
+    @IBAction func edaMinus(_ sender: UIButton) {
+        currentEDA-=0.1
+    }
+    
+    @IBAction func kickBtn(_ sender: UIButton) {
+        kick.play(noteNumber: 60, velocity: 100)
+        kick.stop(noteNumber: 60)
+        print("kick")
+    }
+    @IBAction func snareBtn(_ sender: UIButton) {
+        snare.play(noteNumber: 60, velocity: 50)
+        snare.stop(noteNumber: 60)
+        print("snare")
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
         // Initialization
         kick            = AKSynthKick()
         snare           = AKSynthSnare(duration: 0.07)
-        flute           = AKFlute()
         mandolin        = AKMandolin()
         mandolin2       = AKMandolin()
-        pluckedString   = AKPluckedString()
         
         // Config
         mandolin.detune = 1
@@ -60,7 +87,7 @@ class ViewController: UIViewController {
         mandolin2.presetElectricGuitarMandolin()
         
         // Prepare Output
-        let mix = AKMixer(kick, snare, flute, mandolinReverb, mandolin2)
+        let mix = AKMixer(kick, snare, mandolinReverb, mandolin2)
         let reverb = AKReverb(mix)
         
         AudioKit.output = reverb
@@ -78,9 +105,24 @@ class ViewController: UIViewController {
     }
     
     func playChord(){
+        if (abs(currentTemp - baselineTemp) > tempDelta){
+            print("Stepping")
+            if (currentTemp > baselineTemp){    //Step up to the next chord in the cycle of fifth
+                currentChord = Int((currentChord + 7).truncatingRemainder(dividingBy: 12))
+            }
+            else {      //Step down to the precious chord in the cycle of fifth
+                currentChord = Int((currentChord - 7).truncatingRemainder(dividingBy: 12))
+            }
+            print("Current chord before correction", currentChord)
+            if (currentChord < 0){
+                currentChord = 12 + currentChord
+            }
+            print("current chord after correction", currentChord)
+            baselineTemp = currentTemp
+        }
+        
         if(biomusicOption.isOn){
             playChord(note: ViewController.Notes(rawValue: currentChord)!, scale: .Major)
-            currentChord = Int((currentChord + 7).truncatingRemainder(dividingBy: 12))
         }
     }
 
@@ -128,22 +170,6 @@ class ViewController: UIViewController {
             playChordNote(note: (Int)((note.rawValue + 7).truncatingRemainder(dividingBy:12)), generator: 3, octave: 4)
         }
     }
-
-    @IBAction func kickBtn(_ sender: UIButton) {
-        kick.play(noteNumber: 60, velocity: 100)
-        kick.stop(noteNumber: 60)
-        print("kick")
-    }
-    @IBAction func snareBtn(_ sender: UIButton) {
-        snare.play(noteNumber: 60, velocity: 50)
-        snare.stop(noteNumber: 60)
-        print("snare")
-    }
-    
-    @IBOutlet weak var isChord: UISwitch!
-    @IBOutlet weak var biomusicOption: UISwitch!
-   
-    
     
     
     @IBAction func ANote(_ sender: UIButton) {
@@ -244,13 +270,6 @@ class ViewController: UIViewController {
         }
     }
     
-    @IBAction func randomFlute(_ sender: UIButton) {
-        playRandomFluteNote()
-    }
-    @IBAction func randomMandolinBtn(_ sender: UIButton) {
-        playRandomMandolin()
-    }
-    
     @IBAction func frequencySlider(_ sender: UISlider) {
         timer.invalidate()
         timer2.invalidate()
@@ -261,50 +280,5 @@ class ViewController: UIViewController {
         
         timer2 = Timer.scheduledTimer(timeInterval: timerFrequency/4, target: self, selector: #selector(ViewController.playMelody), userInfo: nil, repeats: true)
     }
-    
-    func playRandomFluteNote(){
-        var note = scale.randomElement()
-        let octave = (2..<6).randomElement() * 12
-        if random(0, 10) < 1.0 { note += 1 }
-        if !scale.contains(note % 12) { print("ACCIDENT!") }
-        
-        let frequency = (note+octave).midiNoteToFrequency()
-        if random(0, 6) > 1.0 {
-            flute.trigger(frequency: frequency, amplitude: 0.1)
-        } else {
-            flute.stop()
-        }
-    }
-    
-    func playRandomMandolin(){
-        var note1 = scale.randomElement()
-        let octave1 = [2,3,4,5].randomElement() * 12
-        let course1 = [1,2,3,4].randomElement()
-        if random(0, 10) < 1.0 { note1 += 1 }
-        
-        var note2 = scale.randomElement()
-        let octave2 = [2,3,4,5].randomElement() * 12
-        let course2 = [1,2,3,4].randomElement()
-        if random(0, 10) < 1.0 { note2 += 1 }
-        
-        
-        if random(0, 6) > 1.0 {
-            mandolin.fret(noteNumber: note1+octave1, course: course1 - 1)
-            mandolin.pluck(course: course1 - 1, position: pluckPosition, velocity: 127)
-        }
-        if random(0, 6) > 3.0 {
-            mandolin.fret(noteNumber: note2+octave2, course: course2 - 1)
-            mandolin.pluck(course: course2 - 1, position: pluckPosition, velocity: 127)
-        }
-    }
-    
-    func createAndStartOscillator(frequency: Double) -> AKOscillator {
-        let oscillator = AKOscillator()
-        oscillator.frequency = frequency
-        oscillator.start()
-        return oscillator
-    }
-
-
 }
 
