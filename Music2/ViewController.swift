@@ -22,9 +22,9 @@ class ViewController: UIViewController {
     
     var deltaTemp   : Double = 0.3
     var deltaEDA     : Double = 0.3
-    var baselineTemp: Double = 0
+    var baselineTemp: Double = 36
     var baselineEDA : Double = 0
-    var currentTemp : Double = 36
+    var currentTemp : Double = 36.4
     var currentEDA  : Double = 0.2
     var currentChord: Int    = 0
     var timerFrequency:Double = 1.0
@@ -107,14 +107,15 @@ class ViewController: UIViewController {
         if (abs(currentTemp - baselineTemp) > deltaTemp){
             if (currentTemp > baselineTemp){    //Step up to the next chord in the cycle of fifth
                 currentChord = Int((currentChord + 7).truncatingRemainder(dividingBy: 12))
+                baselineTemp += deltaTemp
             }
             else {      //Step down to the precious chord in the cycle of fifth
                 currentChord = Int((currentChord - 7).truncatingRemainder(dividingBy: 12))
+                baselineTemp -= deltaTemp
             }
             if (currentChord < 0){
                 currentChord = 12 + currentChord
             }
-            baselineTemp = currentTemp
             scaleIndex = 0
         }
         
@@ -127,14 +128,15 @@ class ViewController: UIViewController {
         if (abs(currentEDA - baselineEDA) > deltaEDA){
             if (currentEDA > baselineEDA){    //Step up to the next chord in the cycle of fifth
                 scaleIndex = Int((scaleIndex + 1).truncatingRemainder(dividingBy: 3))
+                baselineEDA += deltaEDA
             }
             else {      //Step down to the precious chord in the cycle of fifth
                 scaleIndex = Int((scaleIndex - 1).truncatingRemainder(dividingBy: 3))
+                baselineEDA -= deltaEDA
             }
             if (scaleIndex < 0){
                 scaleIndex = 3 + scaleIndex
             }
-            baselineEDA = currentEDA
         }
         
         
