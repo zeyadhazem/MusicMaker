@@ -29,7 +29,7 @@ class ViewController: UIViewController {
     var currentChord: Int    = 0
     var timerFrequency:Double = 1.0
     var pluckPosition   = 0.5
-    var majorScale = [0,4,7]
+    var majorScale = [0,2,4]
     var scaleIndex = 0
     
     
