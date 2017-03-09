@@ -17,6 +17,7 @@ class ViewController: UIViewController {
     var flute           = AKFlute()
     var mandolin        = AKMandolin()
     var mandolin2       = AKMandolin()
+    var clarinet        = AKClarinet()
     var timer = Timer()
     var timer2 = Timer()
     
@@ -29,7 +30,8 @@ class ViewController: UIViewController {
     var currentChord: Int    = 0
     var timerFrequency:Double = 1.0
     var pluckPosition   = 0.5
-    var majorScale = [0,2,4]
+    var mandolin2PluckPosition = 0.2
+    var majorScale = [0,2,4,5,7,9,11]
     var scaleIndex = 0
     
     
@@ -80,16 +82,26 @@ class ViewController: UIViewController {
         
         // Config
         mandolin.detune = 1
-        mandolin.bodySize = 10
+        mandolin.bodySize = 1000
+        mandolin.rampTime = 10000
         mandolin.presetLargeResonantMandolin()
-        let mandolinReverb = AKReverb(mandolin)
+        let mandolinReverb = AKCostelloReverb(mandolin)
+        
+        mandolinReverb.feedback = 2.0
         
         mandolin2.detune = 1
-        mandolin2.bodySize = 1
-        mandolin2.presetElectricGuitarMandolin()
+        mandolin2.bodySize = 1.95
+        //mandolin2.presetElectricGuitarMandolin()
+       
+        let mandolin2Effect = AKLowPassFilter(mandolin2)
+        
+        //mandolin2Effect.cutoffFrequency = 3000
+        let mandolin2Reverb = AKCostelloReverb(mandolin2Effect)
+        
+        mandolin2Reverb.feedback = 0.9
         
         // Prepare Output
-        let mix = AKMixer(kick, snare, mandolinReverb, mandolin2)
+        let mix = AKMixer(kick, snare, mandolinReverb, mandolin2Reverb, clarinet)
         let reverb = AKReverb(mix)
         
         AudioKit.output = reverb
@@ -104,7 +116,11 @@ class ViewController: UIViewController {
     }
     
     func playChord(){
+        let lastChord = currentChord
+        
         if (abs(currentTemp - baselineTemp) > deltaTemp){
+            stopChord(note: ViewController.Notes(rawValue: currentChord)!, scale: .Major)
+            
             if (currentTemp > baselineTemp){    //Step up to the next chord in the cycle of fifth
                 currentChord = Int((currentChord + 7).truncatingRemainder(dividingBy: 12))
                 baselineTemp += deltaTemp
@@ -119,7 +135,7 @@ class ViewController: UIViewController {
             scaleIndex = 0
         }
         
-        if(biomusicOption.isOn){
+        if(biomusicOption.isOn && lastChord != currentChord){
             playChord(note: ViewController.Notes(rawValue: currentChord)!, scale: .Major)
         }
     }
@@ -127,15 +143,15 @@ class ViewController: UIViewController {
     func playMelody(){
         if (abs(currentEDA - baselineEDA) > deltaEDA){
             if (currentEDA > baselineEDA){    //Step up to the next chord in the cycle of fifth
-                scaleIndex = Int((scaleIndex + 1).truncatingRemainder(dividingBy: 3))
+                scaleIndex = Int((scaleIndex + 1).truncatingRemainder(dividingBy: 7))
                 baselineEDA += deltaEDA
             }
             else {      //Step down to the precious chord in the cycle of fifth
-                scaleIndex = Int((scaleIndex - 1).truncatingRemainder(dividingBy: 3))
+                scaleIndex = Int((scaleIndex - 1).truncatingRemainder(dividingBy: 7))
                 baselineEDA -= deltaEDA
             }
             if (scaleIndex < 0){
-                scaleIndex = 3 + scaleIndex
+                scaleIndex = 7 + scaleIndex
             }
         }
         
@@ -145,11 +161,11 @@ class ViewController: UIViewController {
         }
     }
     
-    // Takes a note as an argument
-    func playChordNote(note: Notes, generator: Int, octave: Int){
-        mandolin.fret(noteNumber: note.rawValue + 12*octave, course: generator)
-        mandolin.pluck(course: generator, position: pluckPosition, velocity: 127)
+    func stopChordNote(note: Int, generator: Int, octave: Int){
+        //mandolin.fret(noteNumber: note + 12*octave, course: generator)
+        //mandolin.pluck(course: generator, position: pluckPosition, velocity: 127)
     }
+    
     
     // Takes an Int representing a note as an argument
     func playChordNote(note: Int, generator: Int, octave: Int){
@@ -160,15 +176,28 @@ class ViewController: UIViewController {
     // Takes a note as an argument
     func playMelodyNote(note: Notes, generator: Int, octave: Int){
         mandolin2.fret(noteNumber: note.rawValue + 12*octave, course: generator)
-        mandolin2.pluck(course: generator, position: pluckPosition, velocity: 127)
+        mandolin2.pluck(course: generator, position: mandolin2PluckPosition, velocity: 127)
     }
     
     // Takes an Int representing a note as an argument
     func playMelodyNote(note: Int, generator: Int, octave: Int){
         mandolin2.fret(noteNumber: note + 12*octave, course: generator)
-        mandolin2.pluck(course: generator, position: pluckPosition, velocity: 127)
+        mandolin2.pluck(course: generator, position: mandolin2PluckPosition, velocity: 127)
     }
 
+    
+    func stopChord(note: Notes, scale: Scales){
+        switch scale {
+        case .Major:    //1 - 4 - 7
+            stopChordNote(note: note.rawValue, generator: 1, octave: 4)
+            stopChordNote(note: (Int)((note.rawValue + 4).truncatingRemainder(dividingBy: 12)), generator: 2, octave: 4)  //Mod
+            stopChordNote(note: (Int)((note.rawValue + 7).truncatingRemainder(dividingBy:12)), generator: 3, octave: 4)
+        case .Minor:    //1 - 3 - 7
+            stopChordNote(note: note.rawValue, generator: 1, octave: 4)
+            stopChordNote(note: (Int)((note.rawValue + 3).truncatingRemainder(dividingBy: 12)), generator: 2, octave: 4)
+            stopChordNote(note: (Int)((note.rawValue + 7).truncatingRemainder(dividingBy:12)), generator: 3, octave: 4)
+        }
+    }
     
     
     func playChord(note: Notes, scale: Scales){
