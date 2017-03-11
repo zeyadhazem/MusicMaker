@@ -11,7 +11,7 @@ import AudioKit
 
 class ViewController: UIViewController {
     
-    // Global Vars
+    // Global Vars for music generation
     var kick            = AKSynthKick()
     var snare           = AKSynthSnare(duration: 0.07)
     var flute           = AKFlute()
@@ -21,9 +21,18 @@ class ViewController: UIViewController {
     var timer = Timer()
     var timer2 = Timer()
     
-    var deltaTemp   : Double = 0.3
+    // Global vars for derivative calculation
+    var quadraticTime: [[Double]] = [[Double]](repeating: [0.0], count: 5)
+    var linearTime: [[Double]] = [[Double]](repeating: [0.0], count: 5)
+    let time: [Double] = [0, 0.24, 2*0.24, 3*0.24, 4*0.24]
+    let readingsNumber = 5
+    var currentReadings = 0
+    var readings: [Double] = [0, 0, 0, 0, 0]
+    var newReading: Double = 0.0
+    
+    var deltaTemp   : Double = 0.02
     var deltaEDA     : Double = 0.3
-    var baselineTemp: Double = 36
+    var baselineTemp: Double = 0
     var baselineEDA : Double = 0
     var currentTemp : Double = 36.4
     var currentEDA  : Double = 0.2
@@ -33,6 +42,130 @@ class ViewController: UIViewController {
     var mandolin2PluckPosition = 0.2
     var majorScale = [0,2,4,5,7,9,11]
     var scaleIndex = 0
+    
+    
+    
+    var temperatureReadings: [Double] = [30.21,
+                                         30.21,
+                                         30.21,
+                                         30.21,
+                                         30.21,
+                                         30.21,
+                                         30.21,
+                                         30.21,
+                                         30.21,
+                                         30.21,
+                                         30.21,
+                                         30.21,
+                                         30.19,
+                                         30.19,
+                                         30.19,
+                                         30.19,
+                                         30.21,
+                                         30.21,
+                                         30.21,
+                                         30.21,
+                                         30.21,
+                                         30.21,
+                                         30.21,
+                                         30.21,
+                                         30.21,
+                                         30.21,
+                                         30.21,
+                                         30.21,
+                                         30.21,
+                                         30.21,
+                                         30.21,
+                                         30.21,
+                                         30.21,
+                                         30.21,
+                                         30.21,
+                                         30.21,
+                                         30.23,
+                                         30.23,
+                                         30.23,
+                                         30.23,
+                                         30.23,
+                                         30.23,
+                                         30.23,
+                                         30.23,
+                                         30.23,
+                                         30.23,
+                                         30.23,
+                                         30.23,
+                                         30.25,
+                                         30.25,
+                                         30.25,
+                                         30.25,
+                                         30.21,
+                                         30.21,
+                                         30.21,
+                                         30.21,
+                                         30.25,
+                                         30.25,
+                                         30.25,
+                                         30.25,
+                                         30.25,
+                                         30.25,
+                                         30.25,
+                                         30.25,
+                                         30.25,
+                                         30.25,
+                                         30.25,
+                                         30.25,
+                                         30.25,
+                                         30.25,
+                                         30.25,
+                                         30.25,
+                                         30.21,
+                                         30.21,
+                                         30.21,
+                                         30.21,
+                                         30.25,
+                                         30.25,
+                                         30.25,
+                                         30.25,
+                                         30.27,
+                                         30.27,
+                                         30.27,
+                                         30.27,
+                                         30.27,
+                                         30.27,
+                                         30.27,
+                                         30.27,
+                                         30.27,
+                                         30.27,
+                                         30.27,
+                                         30.27,
+                                         30.25,
+                                         30.25,
+                                         30.25,
+                                         30.25,
+                                         30.29,
+                                         30.29,
+                                         30.29,
+                                         30.29,
+                                         30.27,
+                                         30.27,
+                                         30.27,
+                                         30.27,
+                                         30.27,
+                                         30.27,
+                                         30.27,
+                                         30.27,
+                                         30.27,
+                                         30.27,
+                                         30.27,
+                                         30.27,
+                                         30.27,
+                                         30.27,
+                                         30.27,
+                                         30.27,
+                                         30.29,
+                                         30.29,
+                                         30.29,
+                                         30.29]
+    var readingsIndex = 0
     
     
     // Enums
@@ -74,7 +207,7 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        // Initialization
+        // Initializations
         kick            = AKSynthKick()
         snare           = AKSynthSnare(duration: 0.07)
         mandolin        = AKMandolin()
@@ -87,7 +220,7 @@ class ViewController: UIViewController {
         mandolin.presetLargeResonantMandolin()
         let mandolinReverb = AKCostelloReverb(mandolin)
         
-        mandolinReverb.feedback = 2.0
+        mandolinReverb.feedback = 0.95
         
         mandolin2.detune = 1
         mandolin2.bodySize = 1.95
@@ -98,7 +231,8 @@ class ViewController: UIViewController {
         //mandolin2Effect.cutoffFrequency = 3000
         let mandolin2Reverb = AKCostelloReverb(mandolin2Effect)
         
-        mandolin2Reverb.feedback = 0.9
+        mandolin2Reverb.feedback = 2
+        //mandolin2Reverb.rampTime = 0.5
         
         // Prepare Output
         let mix = AKMixer(kick, snare, mandolinReverb, mandolin2Reverb, clarinet)
@@ -110,10 +244,44 @@ class ViewController: UIViewController {
         // Effects
         reverb.loadFactoryPreset(.mediumRoom)
         
+        // Setup for derivative calculation
+        for i in 0...4{
+            var temp = [Double](repeating: 0.0, count: 3)
+            temp[0] = 1
+            temp[1] = time[i]
+            temp[2] = time[i] * time[i]
+            quadraticTime[i] = temp
+        }
+        
+        for i in 0...4{
+            var temp = [Double](repeating: 0.0, count: 2)
+            temp[0] = 1
+            temp[1] = time[i]
+            linearTime[i] = temp
+        }
+        
         // Start Timers
         timer = Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(ViewController.playChord as (ViewController) -> () -> ()), userInfo: nil, repeats: true)
         timer2 = Timer.scheduledTimer(timeInterval: 1.0/4, target: self, selector: #selector(ViewController.playMelody), userInfo: nil, repeats: true)
     }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     
     func playChord(){
         let lastChord = currentChord
@@ -139,8 +307,68 @@ class ViewController: UIViewController {
             playChord(note: ViewController.Notes(rawValue: currentChord)!, scale: .Major)
         }
     }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
 
     func playMelody(){
+        // Fetch new reading
+        newReading = temperatureReadings[readingsIndex]
+        
+        // Update readings matrix
+        if (currentReadings < readingsNumber){
+            readings[currentReadings] = newReading
+            currentReadings += 1
+        }
+        else {
+            // Shift readings matrix to the left and add new value to its end
+            for i in (0...readingsNumber - 2){
+                readings[i] = readings[i+1]
+            }
+            readings[readingsNumber - 1] = newReading
+            
+            
+            // Do the derivative calculation
+            var ATA = calculateATA(A: quadraticTime, rowsA: 5, columnsA: 3)
+            var ATb = calculateATb(A: quadraticTime, B: readings, rowsA:5, columnsA:3)
+            var soln = solveSquareMatrix(A: ATA, b: ATb, dimA: 3)
+            let secondDerivative = 2 * soln[2]
+            
+            ATA = calculateATA(A: linearTime, rowsA: 5, columnsA: 2)
+            ATb = calculateATb(A: linearTime, B: readings, rowsA:5, columnsA:2)
+            soln = solveSquareMatrix(A: ATA, b: ATb, dimA: 2)
+            let firstDerivative = soln[1]
+            
+            print(firstDerivative)
+            print(secondDerivative)
+            
+            currentTemp = secondDerivative
+            
+        }
+        // Stop fetching readings at end of array
+        if (readingsIndex < temperatureReadings.count - 1){
+            readingsIndex += 1
+        }
+        print(readings)
+        
+        
+        
+        
+        
         if (abs(currentEDA - baselineEDA) > deltaEDA){
             if (currentEDA > baselineEDA){    //Step up to the next chord in the cycle of fifth
                 scaleIndex = Int((scaleIndex + 1).truncatingRemainder(dividingBy: 7))
@@ -321,6 +549,67 @@ class ViewController: UIViewController {
         timer = Timer.scheduledTimer(timeInterval: timerFrequency, target: self, selector: #selector(ViewController.playChord as (ViewController) -> () -> ()), userInfo: nil, repeats: true)
         
         timer2 = Timer.scheduledTimer(timeInterval: timerFrequency/4, target: self, selector: #selector(ViewController.playMelody), userInfo: nil, repeats: true)
+    }
+    
+    func solveSquareMatrix( A: [[Double]], b:[Double], dimA: Int) -> [Double] {
+        var x = [Double](repeating: 0.0, count: dimA)                  // Has the size of RowsA
+        
+        var newA = A
+        var newb = b
+        
+        for k in 0...dimA-2{
+            for i in k+1...dimA-1{
+                newA[i][k] /= newA[k][k];
+                for j in k+1...dimA-1{
+                    newA[i][j] -= newA[i][k]*newA[k][j];
+                }
+            }
+        }
+        
+        for i in 0...dimA-2{
+            for j in i+1...dimA-1{
+                newb[j] -= newA[j][i] * newb[i];
+            }
+        }
+        
+        for i in (0...dimA-1).reversed(){
+            var xsolve: Double = newb[i];
+            
+            if (i+1 > dimA-1){
+                // Do nothing
+            }
+            else {
+                for j in i+1...dimA-1{
+                    xsolve -= newA[i][j] * x[j];
+                }
+            }
+            x[i]=xsolve/newA[i][i];
+        }
+        return x;
+    }
+    
+    func calculateATA(A: [[Double]], rowsA: Int, columnsA: Int) -> [[Double]] {
+        var ATA = [[Double]](repeating: Array(repeating: 0, count: columnsA), count: columnsA)
+        
+        for i in 0...columnsA-1{
+            for j in 0...columnsA-1{
+                for k in 0...rowsA-1{
+                    ATA[j][i] += A[k][i] * A[k][j]
+                }
+            }
+        }
+        return ATA
+    }
+    
+    func calculateATb(A: [[Double]], B: [Double], rowsA: Int, columnsA: Int) -> [Double] {
+        var ATb = [Double](repeating: 0.0, count: columnsA) //N * 1
+        
+        for i in 0...columnsA-1{
+            for j in 0...rowsA-1{
+                ATb[i] += A[j][i] * B[j]
+            }
+        }
+        return ATb
     }
 }
 
