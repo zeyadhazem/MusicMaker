@@ -22,20 +22,23 @@ class ViewController: UIViewController {
     var timer2 = Timer()
     
     // Global vars for derivative calculation
+    let time: [Double] = [0, 0.24, 2*0.24, 3*0.24, 4*0.24]
     var quadraticTime: [[Double]] = [[Double]](repeating: [0.0], count: 5)
     var linearTime: [[Double]] = [[Double]](repeating: [0.0], count: 5)
-    let time: [Double] = [0, 0.24, 2*0.24, 3*0.24, 4*0.24]
+    
     let readingsNumber = 5
     var currentReadings = 0
-    var readings: [Double] = [0, 0, 0, 0, 0]
-    var newReading: Double = 0.0
+    var temperatureReadings: [Double] = [0, 0, 0, 0, 0]
+    var newTemperatureReading: Double = 0.0
+    var GSRReadings: [Double] = [0, 0, 0, 0, 0]
+    var newGSRReading: Double = 0.0
     
-    var deltaTemp   : Double = 0.02
-    var deltaEDA     : Double = 0.3
+    var deltaTemp   : Double = 0.03
+    var deltaEDA     : Double = 0.0025
     var baselineTemp: Double = 0
     var baselineEDA : Double = 0
     var currentTemp : Double = 36.4
-    var currentEDA  : Double = 0.2
+    var currentEDA  : Double = 0.1
     var currentChord: Int    = 0
     var timerFrequency:Double = 1.0
     var pluckPosition   = 0.5
@@ -44,8 +47,123 @@ class ViewController: UIViewController {
     var scaleIndex = 0
     
     
+    var allGSRReadings: [Double] = [0.0781471,
+                                    0.0755849,
+                                    0.076866,
+                                    0.0755849,
+                                    0.0755849,
+                                    0.076866,
+                                    0.076866,
+                                    0.0755849,
+                                    0.076866,
+                                    0.0755849,
+                                    0.076866,
+                                    0.0781471,
+                                    0.0755849,
+                                    0.0781471,
+                                    0.076866,
+                                    0.076866,
+                                    0.076866,
+                                    0.0781471,
+                                    0.0781471,
+                                    0.0781471,
+                                    0.0781471,
+                                    0.0781471,
+                                    0.0794282,
+                                    0.0781471,
+                                    0.0794282,
+                                    0.0781471,
+                                    0.0781471,
+                                    0.0781471,
+                                    0.0794282,
+                                    0.0794282,
+                                    0.0781471,
+                                    0.076866,
+                                    0.0794282,
+                                    0.0781471,
+                                    0.076866,
+                                    0.0794282,
+                                    0.0781471,
+                                    0.0755849,
+                                    0.0781471,
+                                    0.076866,
+                                    0.076866,
+                                    0.076866,
+                                    0.0743038,
+                                    0.0755849,
+                                    0.076866,
+                                    0.0743038,
+                                    0.076866,
+                                    0.0755849,
+                                    0.0743038,
+                                    0.0755849,
+                                    0.0755849,
+                                    0.0755849,
+                                    0.0755849,
+                                    0.076866,
+                                    0.076866,
+                                    0.0781471,
+                                    0.076866,
+                                    0.0781471,
+                                    0.0781471,
+                                    0.0781471,
+                                    0.0781471,
+                                    0.0794282,
+                                    0.0794282,
+                                    0.0807093,
+                                    0.0794282,
+                                    0.0807093,
+                                    0.0819904,
+                                    0.0794282,
+                                    0.0832715,
+                                    0.0832715,
+                                    0.0819904,
+                                    0.0832715,
+                                    0.0845526,
+                                    0.0832715,
+                                    0.0845526,
+                                    0.0845526,
+                                    0.0832715,
+                                    0.0832715,
+                                    0.0819904,
+                                    0.0845526,
+                                    0.0845526,
+                                    0.0832715,
+                                    0.0845526,
+                                    0.0845526,
+                                    0.0845526,
+                                    0.0845526,
+                                    0.0858337,
+                                    0.0845526,
+                                    0.0845526,
+                                    0.0858337,
+                                    0.0858337,
+                                    0.0858337,
+                                    0.0845526,
+                                    0.0845526,
+                                    0.0858337,
+                                    0.0845526,
+                                    0.0845526,
+                                    0.0845526,
+                                    0.0845526,
+                                    0.0871148,
+                                    0.0858337,
+                                    0.0871148,
+                                    0.0871148,
+                                    0.0858337,
+                                    0.0871148,
+                                    0.0871148,
+                                    0.0858337,
+                                    0.0858337,
+                                    0.0845526,
+                                    0.0858337,
+                                    0.0871148,
+                                    0.0845526,
+                                    0.0858337,
+                                    0.0845526]
     
-    var temperatureReadings: [Double] = [30.21,
+    
+    var allTemperatureReadings: [Double] = [30.21,
                                          30.21,
                                          30.21,
                                          30.21,
@@ -177,15 +295,11 @@ class ViewController: UIViewController {
         case Major, Minor
     }
     
+    
     //Outlets
     @IBOutlet weak var isChord: UISwitch!
+    @IBOutlet weak var temperatureDisplay: UITextView!
     @IBOutlet weak var biomusicOption: UISwitch!
-    @IBAction func tempPlus(_ sender: UIButton) {
-        currentTemp+=0.1
-    }
-    @IBAction func tempMinus(_ sender: UIButton) {
-        currentTemp-=0.1
-    }
     @IBAction func edaPlus(_ sender: UIButton) {
         currentEDA+=0.1
     }
@@ -220,7 +334,7 @@ class ViewController: UIViewController {
         mandolin.presetLargeResonantMandolin()
         let mandolinReverb = AKCostelloReverb(mandolin)
         
-        mandolinReverb.feedback = 0.95
+        mandolinReverb.feedback = 0.9
         
         mandolin2.detune = 1
         mandolin2.bodySize = 1.95
@@ -307,66 +421,48 @@ class ViewController: UIViewController {
             playChord(note: ViewController.Notes(rawValue: currentChord)!, scale: .Major)
         }
     }
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
 
     func playMelody(){
         // Fetch new reading
-        newReading = temperatureReadings[readingsIndex]
+        newTemperatureReading = allTemperatureReadings[readingsIndex]
+        newGSRReading = allGSRReadings[readingsIndex]
+        temperatureDisplay.text = "\(newGSRReading)"
         
         // Update readings matrix
         if (currentReadings < readingsNumber){
-            readings[currentReadings] = newReading
+            temperatureReadings[currentReadings] = newTemperatureReading
+            GSRReadings[currentReadings] = newGSRReading
             currentReadings += 1
         }
         else {
             // Shift readings matrix to the left and add new value to its end
             for i in (0...readingsNumber - 2){
-                readings[i] = readings[i+1]
+                temperatureReadings[i] = temperatureReadings[i+1]
+                GSRReadings[i] = GSRReadings[i+1]
             }
-            readings[readingsNumber - 1] = newReading
-            
+            temperatureReadings[readingsNumber - 1] = newTemperatureReading
+            GSRReadings[readingsNumber - 1] = newGSRReading
             
             // Do the derivative calculation
             var ATA = calculateATA(A: quadraticTime, rowsA: 5, columnsA: 3)
-            var ATb = calculateATb(A: quadraticTime, B: readings, rowsA:5, columnsA:3)
+            var ATb = calculateATb(A: quadraticTime, B: temperatureReadings, rowsA:5, columnsA:3)
             var soln = solveSquareMatrix(A: ATA, b: ATb, dimA: 3)
-            let secondDerivative = 2 * soln[2]
+            let secondDerivativeTemp = 2 * soln[2]
             
             ATA = calculateATA(A: linearTime, rowsA: 5, columnsA: 2)
-            ATb = calculateATb(A: linearTime, B: readings, rowsA:5, columnsA:2)
+            ATb = calculateATb(A: linearTime, B: GSRReadings, rowsA:5, columnsA:2)
             soln = solveSquareMatrix(A: ATA, b: ATb, dimA: 2)
-            let firstDerivative = soln[1]
+            let firstDerivativeGSR = soln[1]
             
-            print(firstDerivative)
-            print(secondDerivative)
-            
-            currentTemp = secondDerivative
-            
+            currentTemp = secondDerivativeTemp
+            currentEDA = firstDerivativeGSR
+            print(firstDerivativeGSR)
         }
+        
         // Stop fetching readings at end of array
-        if (readingsIndex < temperatureReadings.count - 1){
+        if (readingsIndex < allGSRReadings.count - 1){
             readingsIndex += 1
         }
-        print(readings)
-        
-        
-        
         
         
         if (abs(currentEDA - baselineEDA) > deltaEDA){
