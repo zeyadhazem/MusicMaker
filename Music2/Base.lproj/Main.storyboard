@@ -193,18 +193,11 @@
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
                             </textView>
-                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" fixedFrame="YES" text="Temp" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="ta9-yD-MKE">
-                                <rect key="frame" x="163" y="450" width="62" height="42"/>
+                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" userInteractionEnabled="NO" contentMode="scaleToFill" fixedFrame="YES" editable="NO" text="Temp" textAlignment="center" selectable="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ta9-yD-MKE">
+                                <rect key="frame" x="42" y="493" width="119" height="106"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                                <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
-                            </textView>
-                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" fixedFrame="YES" text="EDA" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="woM-Xy-PHb">
-                                <rect key="frame" x="168" y="492" width="39" height="33"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <fontDescription key="fontDescription" style="UICTFontTextStyleTitle1"/>
                                 <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
                             </textView>
                             <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" fixedFrame="YES" text="Chord" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="jLC-08-T6A">
@@ -239,26 +232,18 @@
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
                             </textView>
-                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="VRR-jm-Rhd">
-                                <rect key="frame" x="125" y="493" width="30" height="30"/>
+                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" userInteractionEnabled="NO" contentMode="scaleToFill" fixedFrame="YES" editable="NO" text="EDA" textAlignment="center" selectable="NO" translatesAutoresizingMaskIntoConstraints="NO" id="woM-Xy-PHb">
+                                <rect key="frame" x="201" y="493" width="136" height="106"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <state key="normal" title="-"/>
-                                <connections>
-                                    <action selector="edaMinus:" destination="BYZ-38-t0r" eventType="touchUpInside" id="5Vd-Zp-Qns"/>
-                                </connections>
-                            </button>
-                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="nu7-ae-BR9">
-                                <rect key="frame" x="215" y="493" width="30" height="30"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <state key="normal" title="+"/>
-                                <connections>
-                                    <action selector="edaPlus:" destination="BYZ-38-t0r" eventType="touchUpInside" id="ZZQ-8I-UOJ"/>
-                                </connections>
-                            </button>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <fontDescription key="fontDescription" style="UICTFontTextStyleTitle1"/>
+                                <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
+                            </textView>
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                     </view>
                     <connections>
+                        <outlet property="EDADisplay" destination="woM-Xy-PHb" id="BDJ-9a-MqS"/>
                         <outlet property="biomusicOption" destination="ZSb-7I-nZM" id="rjA-Gt-6h2"/>
                         <outlet property="isChord" destination="y3W-PI-r7N" id="9aw-Wo-G9f"/>
                         <outlet property="temperatureDisplay" destination="ta9-yD-MKE" id="Dgz-49-FZp"/>

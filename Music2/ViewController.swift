@@ -32,6 +32,10 @@ class ViewController: UIViewController {
     var newTemperatureReading: Double = 0.0
     var GSRReadings: [Double] = [0, 0, 0, 0, 0]
     var newGSRReading: Double = 0.0
+    var ibiIndex = 0
+    var ibiGSRRatio : Int = 0
+    var newHRReading: Double = 0.0
+    var newTimerFrequency: Double = 1.0
     
     var deltaTemp   : Double = 0.03
     var deltaEDA     : Double = 0.0025
@@ -46,6 +50,8 @@ class ViewController: UIViewController {
     var majorScale = [0,2,4,5,7,9,11]
     var scaleIndex = 0
     
+    
+    var allIBIReadings: [Double] = [0.828163, 0.781286, 0.843789, 0.859414, 0.65628, 0.640654, 0.687531, 0.796911, 0.640654]
     
     var allGSRReadings: [Double] = [0.0781471,
                                     0.0755849,
@@ -300,12 +306,8 @@ class ViewController: UIViewController {
     @IBOutlet weak var isChord: UISwitch!
     @IBOutlet weak var temperatureDisplay: UITextView!
     @IBOutlet weak var biomusicOption: UISwitch!
-    @IBAction func edaPlus(_ sender: UIButton) {
-        currentEDA+=0.1
-    }
-    @IBAction func edaMinus(_ sender: UIButton) {
-        currentEDA-=0.1
-    }
+    @IBOutlet weak var EDADisplay: UITextView!
+    
     
     @IBAction func kickBtn(_ sender: UIButton) {
         kick.play(noteNumber: 60, velocity: 100)
@@ -374,31 +376,27 @@ class ViewController: UIViewController {
             linearTime[i] = temp
         }
         
+        ibiGSRRatio = Int(allGSRReadings.count/allIBIReadings.count)
+        
         // Start Timers
         timer = Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(ViewController.playChord as (ViewController) -> () -> ()), userInfo: nil, repeats: true)
         timer2 = Timer.scheduledTimer(timeInterval: 1.0/4, target: self, selector: #selector(ViewController.playMelody), userInfo: nil, repeats: true)
     }
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     func playChord(){
         let lastChord = currentChord
+        
+        if (timerFrequency != newTimerFrequency){
+            timer.invalidate()
+            timer2.invalidate()
+            
+            timerFrequency = newTimerFrequency
+            timer = Timer.scheduledTimer(timeInterval: timerFrequency, target: self, selector: #selector(ViewController.playChord as (ViewController) -> () -> ()), userInfo: nil, repeats: true)
+            
+            timer2 = Timer.scheduledTimer(timeInterval: timerFrequency/4, target: self, selector: #selector(ViewController.playMelody), userInfo: nil, repeats: true)
+            
+            print(" ", timerFrequency)
+        }
         
         if (abs(currentTemp - baselineTemp) > deltaTemp){
             stopChord(note: ViewController.Notes(rawValue: currentChord)!, scale: .Major)
@@ -421,12 +419,65 @@ class ViewController: UIViewController {
             playChord(note: ViewController.Notes(rawValue: currentChord)!, scale: .Major)
         }
     }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
 
     func playMelody(){
         // Fetch new reading
         newTemperatureReading = allTemperatureReadings[readingsIndex]
         newGSRReading = allGSRReadings[readingsIndex]
-        temperatureDisplay.text = "\(newGSRReading)"
+        
+        if((Double(readingsIndex)).truncatingRemainder(dividingBy: (Double)(ibiGSRRatio)) == 0){
+            if (ibiIndex < allIBIReadings.count){
+                newTimerFrequency = allIBIReadings[ibiIndex]
+                print(newTimerFrequency)
+                ibiIndex += 1
+            }
+        }
+        
+        
+        temperatureDisplay.text = "\(newTemperatureReading)"
+        let y = Double(round(10000*newGSRReading)/10000)
+        EDADisplay.text = "\(y)"
         
         // Update readings matrix
         if (currentReadings < readingsNumber){
@@ -456,14 +507,12 @@ class ViewController: UIViewController {
             
             currentTemp = secondDerivativeTemp
             currentEDA = firstDerivativeGSR
-            print(firstDerivativeGSR)
         }
         
         // Stop fetching readings at end of array
         if (readingsIndex < allGSRReadings.count - 1){
             readingsIndex += 1
         }
-        
         
         if (abs(currentEDA - baselineEDA) > deltaEDA){
             if (currentEDA > baselineEDA){    //Step up to the next chord in the cycle of fifth
@@ -479,11 +528,30 @@ class ViewController: UIViewController {
             }
         }
         
-        
         if(biomusicOption.isOn){
             playMelodyNote(note: currentChord + majorScale[scaleIndex], generator: 1, octave: 4)
         }
     }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     
     func stopChordNote(note: Int, generator: Int, octave: Int){
         //mandolin.fret(noteNumber: note + 12*octave, course: generator)
